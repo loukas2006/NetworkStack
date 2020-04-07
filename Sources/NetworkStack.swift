@@ -252,9 +252,21 @@ extension NetworkStack {
 
   fileprivate func shouldRenewToken(forError error: Error) -> Bool {
     var shouldRenewToken = false
-    if case NetworkStackError.http(httpURLResponse: let httpURLResponse, data: _) = error, httpURLResponse.statusCode == 401 {
-      shouldRenewToken = true
-    }
+    if case NetworkStackError.http(httpURLResponse: let httpURLResponse, data: let data) = error, httpURLResponse.statusCode == 401 {
+      guard let uData: Data = data,
+                 let json: Any = try? JSONSerialization.jsonObject(with: uData) else {
+                
+                   return false
+          }
+      
+      if let uJson: [String: Any] = json as? [String: Any], (uJson["error"] as? String) == "unauthorized" {
+        shouldRenewToken = false
+
+      } else {
+        shouldRenewToken = true
+
+      }
+
     return shouldRenewToken
   }
 
