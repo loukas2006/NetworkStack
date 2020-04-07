@@ -63,9 +63,20 @@ public struct AskCredential {
   
   private static func defaultTriggerCondition(error: Error) -> Bool {
     var shouldAskCredentials = false
-    if case NetworkStackError.http(httpURLResponse: let httpURLResponse, data: _) = error, httpURLResponse.statusCode == 401 {
-      shouldAskCredentials = true
-    }
+   if case NetworkStackError.http(httpURLResponse: let httpURLResponse, data: let data) = error, httpURLResponse.statusCode == 401 {
+      
+      guard let uData: Data = data,
+                 let json: Any = try? JSONSerialization.jsonObject(with: uData) else {
+                
+                   return false
+          }
+      
+      if let uJson: [String: Any] = json as? [String: Any], (uJson["error"] as? String) == "unauthorized" {
+        shouldAskCredentials = false
+      } else {
+        shouldAskCredentials = true
+      } 
+      }
     return shouldAskCredentials
   }
 
