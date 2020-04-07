@@ -267,8 +267,11 @@ extension NetworkStack {
 
       }
 
-    return shouldRenewToken
   }
+    return shouldRenewToken
+
+  }
+  
 
   fileprivate func shouldAskCredentials(forError error: Error) -> Bool {
     guard let triggerCondition = self.askCredential?.triggerCondition else {
